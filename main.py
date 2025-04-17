@@ -1,24 +1,21 @@
-import requests, feedparser, time
+import os
+import requests
+import feedparser
+import time
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1362251264326631435/ZW4Wn3OL2k-8R1PWxdx4O9JKIyGUKfTRyc5c1RVsKv9Va3emfmaVv4TZhFtjNkH_JX1I"
+# Ambil variabel dari environment (Railway Variables)
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+RSS_FEEDS_RAW = os.getenv("RSS_FEEDS")  # Nanti kita pisah pakai koma
+USERNAME = os.getenv("BOT_NAME", "Bullnaut")
 
-RSS_FEEDS = [
-    "https://rss.app/feeds/Q5fY1ufKM5h0qUqq.xml",
-    "https://rss.app/feeds/Iuu11qViSentddWI.xml",
-    "https://rss.app/feeds/7TiZTimdzhX5lrDY.xml",
-    "https://rss.app/feeds/LE4rb9El1JmZmej5.xml",
-    "https://rss.app/feeds/E5PzUy5JBTERIKMw.xml",
-    "https://rss.app/feeds/yzcgA0FIQxpkauvS.xml",
-    "https://rss.app/feeds/VQGwB80jCYCHH3bj.xml",
-    "https://rss.app/feeds/jxtlGnxgHk1xuicw.xml",
-    "https://rss.app/feeds/1wQOoB7NgJpx0DNB.xml"
-]
+# Pecah RSS Feed jadi list
+RSS_FEEDS = RSS_FEEDS_RAW.split(",") if RSS_FEEDS_RAW else []
 
 posted_links = set()
 
 def fetch_and_post():
     for url in RSS_FEEDS:
-        feed = feedparser.parse(url)
+        feed = feedparser.parse(url.strip())
         for entry in feed.entries:
             if entry.link not in posted_links:
                 post_to_discord(entry.title, entry.link)
@@ -26,7 +23,7 @@ def fetch_and_post():
 
 def post_to_discord(title, link):
     data = {
-        "username": "Bullnaut",
+        "username": USERNAME,
         "embeds": [{
             "title": title,
             "url": link,
